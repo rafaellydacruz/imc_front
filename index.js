@@ -1,151 +1,147 @@
-        function abrirTab(index) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'))
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'))
+function abrirTab(index) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-            document.querySelectorAll('.tab-content')[index].classList.add('active')
-            document.querySelectorAll('.tab-btn')[index].classList.add('active')
-        }
-        function formatarResposta(resultado) {
+    document.querySelectorAll('.tab-content')[index].classList.add('active');
+    document.querySelectorAll('.tab-btn')[index].classList.add('active');
+}
 
-            if (resultado.erro) {
-                return `
+function formatarResposta(resultado) {
+
+    if (resultado.erro) {
+        return `
+        <div style="
+            color:#721c24;
+            padding:15px;
+            background:#f8d7da;
+            border:1px solid #f5c6cb;
+            border-radius:5px;
+            font-weight:bold;
+        ">
+            Erro: ${resultado.erro}
+        </div>`;
+    }
+
+    let html = `
     <div style="
-        color:#721c24;
         padding:15px;
-        background:#f8d7da;
-        border:1px solid #f5c6cb;
+        background:#d4edda;
+        color:#155724;
+        border:1px solid #c3e6cb;
         border-radius:5px;
-        font-weight:bold;
     ">
-        Erro: ${resultado.erro}
-    </div>`;
-            }
+    <h3>Sucesso</h3>
+    <ul style="list-style:none;padding:0;">`;
 
-            let html = `
-<div style="
-    padding:15px;
-    background:#d4edda;
-    color:#155724;
-    border:1px solid #c3e6cb;
-    border-radius:5px;
-">`;
+    for (const [key, value] of Object.entries(resultado)) {
 
-            html += `
-<h3 style="
-    margin-top:0;
-    margin-bottom:15px;
-    border-bottom:1px solid #c3e6cb;
-    padding-bottom:5px;
-">
-    Sucesso
-</h3>`;
+        let label = key.charAt(0).toUpperCase() + key.slice(1);
 
-            html += `
-<ul style="
-    list-style-type:none;
-    padding-left:0;
-    margin:0;
-">`;
-
-            // corrigido aqui ↓
-            for (const [key, value] of Object.entries(resultado)) {
-
-                let label = key.charAt(0).toUpperCase() + key.slice(1);
-
-                // corrigido aqui ↓
-                if (key.toLowerCase() === "imc") {
-                    label = "IMC";
-                }
-
-                html += `
-    <li style="margin-bottom:8px;font-size:16px;">
-        <strong style="color:#0b2e13">${label}:</strong> ${value}
-    </li>`;
-            }
-
-            html += `
-</ul>
-</div>`;
-
-            return html;
-        }
-        async function calcularImc() {
-            
-            const dados = {
-                nome: document.getElementById('nome').value,
-                idade: document.getElementById('idade').value,
-                altura: document.getElementById('altura').value,
-                peso: document.getElementById('peso').value,
-            };
-
-            try {
-                const res = await fetch("http://localhost:3000/imc", {
-                    method: "POST", // corrigido
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(dados)
-                });
-
-                // verifica se a resposta foi bem sucedida
-                if (!res.ok) {
-                    throw new Error(`Erro HTTP: ${res.status}`);
-                }
-
-                const resultado = await res.json();
-
-                console.log(resultado);
-
-                document.getElementById("resultadoImc").innerHTML =
-                    formatarResposta(resultado);
-
-            } catch (error) {
-                console.error(error);
-
-                document.getElementById("resultadoImc").innerHTML =
-                    formatarResposta({
-                        erro: "Ocorreu um erro inesperado. Por favor tente novamente mais tarde."
-                    });
-            }
+        if (key.toLowerCase() === "imc") {
+            label = "IMC";
         }
 
+        html += `
+        <li>
+            <strong>${label}:</strong> ${value}
+        </li>`;
+    }
 
-        async function calcularMedia() {
+    html += `</ul></div>`;
 
-            const dados = {
-               
-                nota1: document.getElementById('nota1').value,
-                nota2: document.getElementById('nota2').value,
-            };
+    return html;
+}
 
-            try {
+async function calcularImc() {
 
-                const res = await fetch ("http://localhost:3000/media", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(dados)
-                });
+    const dados = {
+        nome: document.getElementById('nome').value,
+        idade: document.getElementById('idade').value,
+        altura: document.getElementById('altura').value,
+        peso: document.getElementById('peso').value,
+    };
 
-                if (!res.ok) {
-                    throw new Error(`Erro HTTP: ${res.status}`);
-                }
+    try {
+        const res = await fetch("http://localhost:3000/imc", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
 
-                const resultado = await res.json();
+        if (!res.ok) throw new Error(res.status);
 
-                console.log(resultado);
+        const resultado = await res.json();
 
-                document.getElementById("resultadoMedia").innerHTML =
-                    formatarResposta(resultado);
+        document.getElementById("resultadoImc").innerHTML =
+            formatarResposta(resultado);
 
-            } catch (error) {
+    } catch (error) {
+        document.getElementById("resultadoImc").innerHTML =
+            formatarResposta({ erro: "Erro ao calcular IMC" });
+    }
+}
 
-                console.error(error);
+async function calcularMedia() {
 
-                document.getElementById("resultadoMedia").innerHTML =
-                    formatarResposta({
-                        erro: "Ocorreu um erro inesperado. Por favor tente novamente mais tarde."
-                    });
-            }
+    const dados = {
+        nome2: document.getElementById('nome2').value,
+        nota1: document.getElementById('nota1').value,
+        nota2: document.getElementById('nota2').value,
+    };
+
+    try {
+        const res = await fetch("http://localhost:3000/media", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+
+        if (!res.ok) throw new Error(res.status);
+
+        const resultado = await res.json();
+
+        document.getElementById("resultadoMedia").innerHTML =
+            formatarResposta(resultado);
+
+    } catch (error) {
+        document.getElementById("resultadoMedia").innerHTML =
+            formatarResposta({ erro: "Erro ao calcular média" });
+    }
+}
+async function login() {
+
+    const dados = {
+        email: document.getElementById('email').value,
+        senha: document.getElementById('senha').value,
+     
+    };
+
+    try {
+        const res = await fetch("http://localhost:3000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+          const resultado = await res.json();
+
+        if (resultado.token){
+        window.location.href= "index.html"
         }
+        else{
+            alert(resultado.erro)
+        }
+
+
+      
+
+
+    } catch (error) {
+         alert(error)
+    }
+}
